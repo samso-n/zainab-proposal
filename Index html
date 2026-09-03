@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Zainab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Work+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --wine: #2B0F16;
+    --wine-deep: #1C0A0F;
+    --plum: #4A1F2B;
+    --gold: #C9A66B;
+    --blush: #E3B6B0;
+    --cream: #F4E9E1;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+
+  body {
+    background: radial-gradient(circle at 50% 20%, var(--plum) 0%, var(--wine) 55%, var(--wine-deep) 100%);
+    font-family: 'Work Sans', sans-serif;
+    color: var(--cream);
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .petals {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .petal {
+    position: absolute;
+    top: -5%;
+    font-size: 18px;
+    opacity: 0.5;
+    animation: drift linear infinite;
+    color: var(--blush);
+  }
+
+  @keyframes drift {
+    0% { transform: translateY(-10vh) translateX(0) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.55; }
+    90% { opacity: 0.45; }
+    100% { transform: translateY(110vh) translateX(var(--drift, 40px)) rotate(200deg); opacity: 0; }
+  }
+
+  .stage {
+    position: relative;
+    z-index: 2;
+    max-width: 560px;
+    width: 90%;
+    text-align: center;
+    padding: 40px 28px;
+  }
+
+  .screen { display: none; }
+  .screen.active { display: block; animation: rise 0.8s ease-out forwards; }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .greeting {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 500;
+    font-style: italic;
+    font-size: clamp(2rem, 7vw, 2.8rem);
+    color: var(--gold);
+    margin-bottom: 22px;
+  }
+
+  .body-text {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    font-weight: 300;
+    color: var(--cream);
+    white-space: pre-line;
+  }
+
+  .lead-in {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: clamp(1.6rem, 5.5vw, 2.1rem);
+    color: var(--blush);
+    margin-bottom: 26px;
+  }
+
+  .final-question {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-size: clamp(1.9rem, 7vw, 2.6rem);
+    color: var(--gold);
+    margin-bottom: 20px;
+  }
+
+  .final-note {
+    font-size: 1rem;
+    line-height: 1.8;
+    font-weight: 300;
+    color: var(--cream);
+    margin-bottom: 8px;
+  }
+
+  .nav {
+    margin-top: 38px;
+  }
+
+  .choice-nav {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    min-height: 56px;
+  }
+
+  .no-btn {
+    position: relative;
+    border-color: var(--blush);
+    color: var(--blush);
+  }
+
+  .no-btn.dodging {
+    position: absolute;
+  }
+
+  .no-btn:hover, .no-btn:focus-visible {
+    background: transparent;
+    color: var(--blush);
+  }
+
+  .tease {
+    margin-top: 22px;
+    min-height: 22px;
+    font-size: 0.95rem;
+    font-style: italic;
+    font-family: 'Cormorant Garamond', serif;
+    color: var(--gold);
+  }
+
+  button {
+    font-family: 'Work Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    padding: 14px 38px;
+    border-radius: 999px;
+    border: 1px solid var(--gold);
+    background: transparent;
+    color: var(--gold);
+    cursor: pointer;
+    transition: background 0.4s ease, color 0.4s ease, transform 0.2s ease;
+  }
+
+  button:hover { background: var(--gold); color: var(--wine-deep); transform: translateY(-2px); }
+  button:disabled { opacity: 0.35; cursor: default; }
+  button:disabled:hover { background: transparent; color: var(--gold); transform: none; }
+  button:focus-visible { outline: 2px solid var(--cream); outline-offset: 3px; }
+
+  /* Dot game */
+  .dot-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+  }
+
+  svg { width: 100%; height: auto; overflow: visible; }
+
+  .dot {
+    fill: var(--cream);
+    stroke: var(--gold);
+    stroke-width: 1.5;
+    cursor: pointer;
+    transition: fill 0.3s ease;
+  }
+
+  .dot.done { fill: var(--gold); }
+
+  .dot-label {
+    font-family: 'Work Sans', sans-serif;
+    font-size: 9px;
+    fill: var(--wine-deep);
+    pointer-events: none;
+    text-anchor: middle;
+    dominant-baseline: central;
+    font-weight: 500;
+  }
+
+  .heart-line {
+    fill: none;
+    stroke: var(--gold);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+  }
+
+  .game-hint {
+    margin-top: 18px;
+    font-size: 0.9rem;
+    font-weight: 300;
+    color: var(--blush);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .screen.active { animation: none; opacity: 1; }
+    .petal { animation: none; display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="petals" id="petals"></div>
+
+<div class="stage">
+
+  <div class="screen active" data-screen="0">
+    <p class="body-text">Hey Zainab,
+
+Yeah, it's Samson again. I really can't seem to leave you alone, right? Lol.
+
+How are you faring? Well, knowing the Zainab I know, I'm sure you're fine.</p>
+    <div class="nav"><button class="next-btn">Next</button></div>
+  </div>
+
+  <div class="screen" data-screen="1">
+    <p class="body-text">I know we've had our ups and downs. I know I wasn't always the best to you, and I know I caused you more trouble than I should have. For all of that, I'm truly sorry.</p>
+    <div class="nav"><button class="next-btn">Next</button></div>
+  </div>
+
+  <div class="screen" data-screen="2">
+    <p class="body-text">But despite everything, I still think about the good moments we had. The laughs, the conversations, the little things. And sometimes I wish we could turn back the hands of time, just so you could see me do things right this time.</p>
+    <div class="nav"><button class="next-btn">Next</button></div>
+  </div>
+
+  <div class="screen" data-screen="3">
+    <p class="body-text">I can't change what happened, but I can choose what happens next.
+
+And honestly, if I had another chance, I'd still choose you.</p>
+    <div class="nav"><button class="next-btn">Next</button></div>
+  </div>
+
+  <div class="screen" data-screen="4">
+    <p class="body-text">I'm not asking you to forget everything that happened. I'm not asking you to pretend I never hurt you. I'm asking you to look at me as I am now, and give me the opportunity to show you that I can do better.</p>
+    <div class="nav"><button class="next-btn">Next</button></div>
+  </div>
+
+  <div class="screen" data-screen="5">
+    <p class="lead-in">So, Zainab&hellip;</p>
+    <div class="dot-wrap">
+      <svg id="dotSvg" viewBox="0 0 300 220"></svg>
+    </div>
+    <p class="game-hint">Connect the dots, in order.</p>
+    <div class="nav"><button id="continueBtn" disabled>Continue</button></div>
+  </div>
+
+  <div class="screen" data-screen="6">
+    <p class="final-question">Will you be my girlfriend?</p>
+    <p class="final-note">It's not the grandest proposal, but it's coming from a very genuine place. I just want another chance to love you properly, and hopefully, give you a reason to believe in us again. ❤️</p>
+    <p class="final-note">Pls say yes, love of my life.</p>
+    <div class="nav choice-nav">
+      <button id="yesBtn">Yes</button>
+      <button id="noBtn" class="no-btn">No</button>
+    </div>
+    <p class="tease" id="teaseText">&nbsp;</p>
+  </div>
+
+</div>
+
+<script>
+  // Ambient petals
+  const petalContainer = document.getElementById('petals');
+  for (let i = 0; i < 14; i++) {
+    const p = document.createElement('div');
+    p.className = 'petal';
+    p.textContent = '❀';
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.fontSize = (12 + Math.random() * 14) + 'px';
+    p.style.setProperty('--drift', (Math.random() * 80 - 40) + 'px');
+    p.style.animationDuration = (14 + Math.random() * 10) + 's';
+    p.style.animationDelay = (Math.random() * 12) + 's';
+    petalContainer.appendChild(p);
+  }
+
+  // Screen navigation
+  const screens = Array.from(document.querySelectorAll('.screen'));
+  let current = 0;
+
+  function goTo(index) {
+    screens[current].classList.remove('active');
+    current = index;
+    screens[current].classList.add('active');
+  }
+
+  document.querySelectorAll('.next-btn').forEach(btn => {
+    btn.addEventListener('click', () => goTo(current + 1));
+  });
+
+  // Connect-the-dots heart
+  const svg = document.getElementById('dotSvg');
+  const cx = 150, cy = 110, scale = 6;
+  const points = [];
+  const N = 12;
+  for (let i = 0; i < N; i++) {
+    const t = (i / N) * 2 * Math.PI;
+    const xm = 16 * Math.pow(Math.sin(t), 3);
+    const ym = 13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t);
+    points.push({ x: cx + scale * xm, y: cy - scale * ym });
+  }
+
+  let nextIndex = 0;
+  const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  pathEl.setAttribute('class', 'heart-line');
+  svg.appendChild(pathEl);
+  let pathD = '';
+
+  points.forEach((pt, i) => {
+    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    dot.setAttribute('cx', pt.x);
+    dot.setAttribute('cy', pt.y);
+    dot.setAttribute('r', 9);
+    dot.setAttribute('class', 'dot');
+    dot.dataset.index = i;
+
+    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    label.setAttribute('x', pt.x);
+    label.setAttribute('y', pt.y);
+    label.setAttribute('class', 'dot-label');
+    label.textContent = i + 1;
+
+    dot.addEventListener('click', () => {
+      if (i !== nextIndex) return;
+      dot.classList.add('done');
+      if (nextIndex === 0) {
+        pathD = `M ${pt.x} ${pt.y}`;
+      } else {
+        pathD += ` L ${pt.x} ${pt.y}`;
+      }
+      pathEl.setAttribute('d', pathD);
+      nextIndex++;
+      if (nextIndex === N) {
+        pathD += ` L ${points[0].x} ${points[0].y}`;
+        pathEl.setAttribute('d', pathD);
+        document.getElementById('continueBtn').disabled = false;
+      }
+    });
+
+    svg.appendChild(dot);
+    svg.appendChild(label);
+  });
+
+  document.getElementById('continueBtn').addEventListener('click', () => goTo(current + 1));
+
+  // WhatsApp send
+  const phone = '2349033964890';
+  const message = "Yes 💛";
+  const waLink = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+  document.getElementById('yesBtn').addEventListener('click', () => {
+    window.location.href = waLink;
+  });
+
+  // Playful dodging No button
+  const noBtn = document.getElementById('noBtn');
+  const choiceNav = document.querySelector('.choice-nav');
+  const teaseText = document.getElementById('teaseText');
+  const teases = [
+    'say yes madam cosmique 😏',
+    'try again',
+    'nope, not that one',
+    'you know your answer',
+    'come on now'
+  ];
+  let teaseIndex = 0;
+  let dodgeCount = 0;
+
+  function dodge() {
+    dodgeCount++;
+    noBtn.classList.add('dodging');
+    const navRect = choiceNav.getBoundingClientRect();
+    const btnRect = noBtn.getBoundingClientRect();
+    const maxX = Math.max(navRect.width - btnRect.width, 0);
+    const maxY = Math.max(140, 0);
+    const x = Math.random() * maxX;
+    const y = (Math.random() - 0.5) * maxY;
+    noBtn.style.left = x + 'px';
+    noBtn.style.top = y + 'px';
+    teaseText.textContent = teases[teaseIndex % teases.length];
+    teaseIndex++;
+  }
+
+  noBtn.addEventListener('mouseenter', dodge);
+  noBtn.addEventListener('touchstart', (e) => { e.preventDefault(); dodge(); }, { passive: false });
+  noBtn.addEventListener('click', (e) => { e.preventDefault(); dodge(); });
+</script>
+
+</body>
+</html>
